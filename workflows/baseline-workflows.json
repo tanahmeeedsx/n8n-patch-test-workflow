@@ -1,0 +1,4 @@
+{
+  "note": "Exported n8n workflows used for baseline functional testing.",
+  "workflows": ["Core Workflow Test", "Webhook Test"]
+}

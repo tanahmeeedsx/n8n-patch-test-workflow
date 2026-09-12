@@ -1,0 +1,3 @@
+NAME                   IMAGE                            COMMAND                  SERVICE    CREATED         STATUS                   PORTS
+n8n-staging-app        docker.n8n.io/n8nio/n8n:2.36.7   "tini -- /docker-ent…"   n8n        8 minutes ago   Up 8 minutes             127.0.0.1:5678->5678/tcp
+n8n-staging-postgres   postgres:16-alpine               "docker-entrypoint.s…"   postgres   8 minutes ago   Up 8 minutes (healthy)   5432/tcp
