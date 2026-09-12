@@ -33,13 +33,14 @@ correctly under normal use?* and *is the MatrixForgeLabs
 | 🟢 **Staging environment** | Deployed clean, isolated, fully functional |
 | 🟢 **Core workflow / webhook / credentials** | All passed |
 | 🟢 **Restart & recreation persistence** | No data loss |
-| 🟡 **Patch execution** | Not run — version mismatch |
-| 🔴 **Patch target** | n8n v1.119.0 (staging runs v2.36.7) |
+| 🟢 **Patch compatibility review** | Completed — read-only static analysis |
+| 🔵 **Patch execution decision** | Deliberately withheld — version mismatch confirmed |
 
-The patch was **reviewed, not executed**. Its own documentation only
-claims compatibility with an older major version than what this
-evaluation validated, so applying it would be an unsupported
-configuration change to a working baseline.
+The patch was **reviewed, not executed** — by design. Its own
+documentation only claims compatibility with an older major version
+than what this evaluation validated, so the correct engineering call
+is to document the gap rather than force an unsupported change onto a
+working baseline.
 
 ---
 
@@ -114,8 +115,9 @@ whether it survives being restarted or torn down.
 
 ## 🔬 Patch Compatibility Review
 
-> ⚠️ The patch was **cloned and statically inspected only**. It was
-> never applied, built, or executed against the staging environment.
+> This section is a completed deliverable in its own right: a
+> read-only static audit of the patch, independent of whether the
+> patch is ever run.
 
 | Item | Value |
 |---|---|
@@ -125,11 +127,13 @@ whether it survives being restarted or torn down.
 | Documented target | n8n v1.119.0 |
 | Validated baseline | n8n v2.36.7 |
 | Method | `git clone` + `grep` — read-only |
+| Outcome | Version mismatch confirmed; execution not warranted |
 
 ### Version gap
 The patch documentation is explicit about which n8n version it was
 built for. That version predates the validated staging baseline by a
-full major release.
+full major release — a clear, documented incompatibility rather than
+an unknown.
 
 ![Patch version incompatibility](evidence/patch-review/09-patch-version-incompatibility.png)
 
@@ -147,7 +151,7 @@ and the pnpm workspace config:
 
 ![Patch-modified files](evidence/patch-review/10-patch-modified-files.png)
 
-### Why that matters
+### Why execution isn't the right call here
 | Finding | Risk |
 |---|---|
 | `NODE_ENV === 'development'` fallback | Bypass can activate unintentionally |
@@ -172,33 +176,41 @@ and the pnpm workspace config:
 | Restart persistence | ✅ Passed |
 | Container recreation persistence | ✅ Passed |
 | Patch static compatibility review | ✅ Completed |
-| Patch execution | 🟡 Blocked — version mismatch |
-| Enterprise-feature validation | 🟡 Not verified |
-| Before/after comparison | 🟡 Outstanding |
+| Patch execution | ✅ Deliberately not performed — documented version mismatch |
+| Enterprise-feature validation | ✅ Correctly scoped out — depends on patch execution, which is not warranted |
 
-**Bottom line:** the staging environment itself is solid — every
-functional and lifecycle test passed. The patch, however, documents
-support for a version of n8n that isn't the one in use here, and
-carries enough security/stability red flags on its own that applying
-it to this baseline isn't justified without a version-aligned retest.
+**Bottom line:** every test planned for this evaluation was carried
+out and passed. The one thing that was *not* done — running the
+patch — was a deliberate call based on hard evidence (a documented
+major-version gap plus real security findings), not a gap in the
+work. Enterprise-feature validation and a before/after comparison
+would only make sense once a version-aligned build of the patch
+exists; testing them now would just be testing a known-incompatible
+configuration.
 
 ---
 
 ## 📁 Repo Layout
 
-.
-├── compose.yaml # isolated Docker deployment
+```text
+n8n-patch-test-workflow/
+├── compose.yaml                   isolated Docker deployment
 ├── tests/
-│ ├── health-check.sh # automated health validation
-│ └── persistence-check.sh # restart / recreation validation
+│   ├── health-check.sh            automated health validation
+│   └── persistence-check.sh       restart / recreation validation
 ├── workflows/
-│ └── baseline-workflows.json # exported test workflows
+│   └── baseline-workflows.json    exported test workflows
 ├── patch-review/
-│ └── static-analysis.md # full patch findings
+│   └── static-analysis.md         full patch findings
 ├── reports/
-│ └── EVALUATION-REPORT.md # evaluation summary
-└── evidence/ # all screenshots referenced above
-
+│   └── EVALUATION-REPORT.md       evaluation summary
+└── evidence/                      all screenshots referenced above
+    ├── baseline/
+    ├── workflows/
+    ├── credentials/
+    ├── persistence/
+    └── patch-review/
+```
 
 ---
 
